@@ -259,25 +259,181 @@ export default function FantasyFootballDashboard() {
 
     try {
       setIsLoading(true)
+      
+      // Check clipboard permissions first
+      if (!navigator.clipboard || !navigator.clipboard.write) {
+        throw new Error("Clipboard API not supported")
+      }
+
       const html2canvas = (await import("html2canvas")).default
-      const canvas = await html2canvas(sharePreviewRef.current, {
+      
+      // Create a completely new element with inline styles instead of cloning
+      const createStyledElement = () => {
+        const container = document.createElement('div')
+        container.style.cssText = `
+          background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+          color: white;
+          padding: 32px;
+          border-radius: 8px;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+          border: 4px solid #dc2626;
+          width: 700px;
+          min-height: fit-content;
+          font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+          position: absolute;
+          left: -9999px;
+          top: -9999px;
+        `
+
+        // Header
+        const header = document.createElement('div')
+        header.style.cssText = `
+          text-align: center;
+          margin-bottom: 32px;
+          border-bottom: 2px solid #dc2626;
+          padding-bottom: 24px;
+        `
+        
+        const title = document.createElement('h2')
+        title.style.cssText = 'font-size: 24px; font-weight: bold; margin: 12px 0; color: white;'
+        title.textContent = '🇺🇸 The National Freedom League'
+        
+        const subtitle = document.createElement('p')
+        subtitle.style.cssText = 'color: #bfdbfe; font-size: 18px; margin: 8px 0;'
+        subtitle.textContent = `Championship Season 2025 - Week ${selectedWeek}`
+        
+        const standings = document.createElement('p')
+        standings.style.cssText = 'color: #fde047; font-weight: bold; margin: 4px 0;'
+        standings.textContent = 'Freedom Points Standings'
+        
+        const est = document.createElement('p')
+        est.style.cssText = 'color: #93c5fd; font-size: 14px; margin: 4px 0;'
+        est.textContent = 'Est. 2023'
+        
+        header.appendChild(title)
+        header.appendChild(subtitle)
+        header.appendChild(standings)
+        header.appendChild(est)
+
+        // Table header
+        const tableHeader = document.createElement('div')
+        tableHeader.style.cssText = `
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 16px;
+          margin-bottom: 16px;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        `
+        
+        const headerLeft = document.createElement('div')
+        headerLeft.style.cssText = 'display: flex; align-items: center; gap: 16px;'
+        headerLeft.innerHTML = '<span style="color: #fde047; font-weight: bold; font-size: 18px; width: 48px;">Rank</span><span style="color: #fde047; font-weight: bold; font-size: 18px;">Team Name</span>'
+        
+        const headerRight = document.createElement('div')
+        headerRight.style.cssText = 'display: flex; gap: 32px; color: #fde047; font-weight: bold; font-size: 18px;'
+        headerRight.innerHTML = '<span style="width: 80px; text-align: center;">Total FPs</span><span style="width: 80px; text-align: center;">Week FPs</span>'
+        
+        tableHeader.appendChild(headerLeft)
+        tableHeader.appendChild(headerRight)
+
+        // Team rows
+        const teamsContainer = document.createElement('div')
+        teamsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 12px;'
+        
+        const sortedByTotal = [...teamsData].sort((a, b) => b.totalFPs - a.totalFPs)
+        
+        sortedByTotal.forEach((team, index) => {
+          const row = document.createElement('div')
+          const bgColor = getPatrioticGradientColor(team.totalFPs, teamsData)
+          row.style.cssText = `
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background-color: ${bgColor};
+          `
+          
+          const rowLeft = document.createElement('div')
+          rowLeft.style.cssText = 'display: flex; align-items: center; gap: 16px;'
+          rowLeft.innerHTML = `<span style="color: white; font-weight: bold; font-size: 18px; width: 48px;">${index + 1}.</span><span style="color: white; font-weight: bold; font-size: 18px;">${team.name}</span>`
+          
+          const rowRight = document.createElement('div')
+          rowRight.style.cssText = 'display: flex; gap: 32px; color: white; font-weight: bold; font-size: 18px;'
+          rowRight.innerHTML = `<span style="width: 80px; text-align: center;">${team.totalFPs}</span><span style="width: 80px; text-align: center;">${team.weekFPs}</span>`
+          
+          row.appendChild(rowLeft)
+          row.appendChild(rowRight)
+          teamsContainer.appendChild(row)
+        })
+
+        // Footer
+        const footer = document.createElement('div')
+        footer.style.cssText = `
+          text-align: center;
+          margin-top: 32px;
+          padding-top: 24px;
+          border-top: 2px solid #dc2626;
+        `
+        footer.innerHTML = '<p style="color: #bfdbfe; font-size: 14px; margin: 0;">🇺🇸 Share the Freedom! 🇺🇸</p>'
+
+        container.appendChild(header)
+        container.appendChild(tableHeader)
+        container.appendChild(teamsContainer)
+        container.appendChild(footer)
+        
+        return container
+      }
+
+      const tempElement = createStyledElement()
+      document.body.appendChild(tempElement)
+
+      // Wait for element to be rendered and get its actual dimensions
+      await new Promise(resolve => setTimeout(resolve, 100))
+      const elementRect = tempElement.getBoundingClientRect()
+      const actualHeight = Math.max(elementRect.height, tempElement.scrollHeight)
+
+      const canvas = await html2canvas(tempElement, {
         backgroundColor: "#1e3a8a",
         scale: 2,
         width: 700,
-        height: 900,
+        height: actualHeight,
+        useCORS: true,
+        allowTaint: true,
       })
 
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const item = new ClipboardItem({ "image/png": blob })
-          navigator.clipboard.write([item])
-          setCopySuccess("Freedom shared successfully!")
-          setTimeout(() => setCopySuccess(null), 3000)
-        }
+      // Clean up temp element
+      document.body.removeChild(tempElement)
+
+      // Convert canvas to blob and copy to clipboard
+      await new Promise<void>((resolve, reject) => {
+        canvas.toBlob(async (blob) => {
+          if (blob) {
+            try {
+              const item = new ClipboardItem({ "image/png": blob })
+              await navigator.clipboard.write([item])
+              setCopySuccess("Freedom shared successfully!")
+              setTimeout(() => setCopySuccess(null), 3000)
+              resolve()
+            } catch (clipboardError) {
+              console.error("Clipboard error:", clipboardError)
+              reject(clipboardError)
+            }
+          } else {
+            reject(new Error("Failed to create image blob"))
+          }
+        }, "image/png")
       })
     } catch (error) {
-      setError("Failed to share the freedom. Please try again.")
-      setTimeout(() => setError(null), 3000)
+      console.error("Copy image error:", error)
+      setError(`Failed to share the freedom: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      setTimeout(() => setError(null), 5000)
     } finally {
       setIsLoading(false)
     }
