@@ -26,29 +26,29 @@ import {
 const teamsData = [
   {
     id: 1,
-    name: "Thunder Bolts",
-    totalFPs: 89,
-    weekFPs: 8,
+    name: "Homan's Heroes",
+    totalFPs: 10,
+    weekFPs: 10,
     logo: "/lightning-bolt-logo.png",
-    record: "7-2",
+    record: "1-0",
     trend: "up",
-    lastFourWeeks: [7, 8, 9, 8],
+    lastFourWeeks: [10],
   },
   {
     id: 2,
-    name: "Fire Dragons",
-    totalFPs: 84,
-    weekFPs: 7,
+    name: "Too Many Cooks",
+    totalFPs: 9,
+    weekFPs: 9,
     logo: "/placeholder-fqsfz.png",
     record: "6-3",
     trend: "down",
-    lastFourWeeks: [9, 7, 6, 7],
+    lastFourWeeks: [9],
   },
   {
     id: 3,
-    name: "Steel Titans",
-    totalFPs: 78,
-    weekFPs: 9,
+    name: "Jack's Micro Penix",
+    totalFPs: 8,
+    weekFPs: 8,
     logo: "/placeholder-t6pcg.png",
     record: "6-3",
     trend: "up",
@@ -56,9 +56,9 @@ const teamsData = [
   },
   {
     id: 4,
-    name: "Storm Eagles",
-    totalFPs: 73,
-    weekFPs: 6,
+    name: "Power Rankings Are Wrong",
+    totalFPs: 7,
+    weekFPs: 7,
     logo: "/placeholder-6f1o2.png",
     record: "5-4",
     trend: "down",
@@ -66,9 +66,9 @@ const teamsData = [
   },
   {
     id: 5,
-    name: "Ice Wolves",
-    totalFPs: 68,
-    weekFPs: 5,
+    name: "The Chicken Finger Specials",
+    totalFPs: 6,
+    weekFPs: 6,
     logo: "/placeholder-y15id.png",
     record: "4-5",
     trend: "down",
@@ -76,9 +76,9 @@ const teamsData = [
   },
   {
     id: 6,
-    name: "Golden Lions",
-    totalFPs: 62,
-    weekFPs: 4,
+    name: "Jake Nevin's Medical Tent",
+    totalFPs: 5,
+    weekFPs: 5,
     logo: "/placeholder-8ziwv.png",
     record: "4-5",
     trend: "down",
@@ -86,9 +86,9 @@ const teamsData = [
   },
   {
     id: 7,
-    name: "Shadow Hawks",
-    totalFPs: 58,
-    weekFPs: 3,
+    name: "Rag Tag Bunch",
+    totalFPs: 4,
+    weekFPs: 4,
     logo: "/placeholder-dfy32.png",
     record: "3-6",
     trend: "down",
@@ -96,9 +96,9 @@ const teamsData = [
   },
   {
     id: 8,
-    name: "Crimson Bears",
-    totalFPs: 53,
-    weekFPs: 2,
+    name: "Big Nix Energy",
+    totalFPs: 3,
+    weekFPs: 3,
     logo: "/placeholder-vfo8r.png",
     record: "3-6",
     trend: "down",
@@ -106,9 +106,9 @@ const teamsData = [
   },
   {
     id: 9,
-    name: "Silver Sharks",
-    totalFPs: 49,
-    weekFPs: 1,
+    name: "Rocky Top",
+    totalFPs: 2,
+    weekFPs: 2,
     logo: "/placeholder-5rynh.png",
     record: "2-7",
     trend: "down",
@@ -116,9 +116,9 @@ const teamsData = [
   },
   {
     id: 10,
-    name: "Midnight Owls",
-    totalFPs: 45,
-    weekFPs: 10,
+    name: "Ja'Marr-tial Law",
+    totalFPs: 1,
+    weekFPs: 1,
     logo: "/placeholder-x5f34.png",
     record: "2-7",
     trend: "up",
@@ -227,6 +227,192 @@ export default function FantasyFootballDashboard() {
     }
   }
 
+  // Shareable component for consistent rendering
+  const ShareableStandings = ({ forCapture = false }: { forCapture?: boolean }) => {
+    const sortedByTotal = [...teamsData].sort((a, b) => b.totalFPs - a.totalFPs)
+    
+    return (
+      <div 
+        className={forCapture ? "" : "bg-gradient-to-br from-blue-900 to-blue-800 text-white p-8 rounded-lg shadow-2xl border-4 border-red-600"}
+        style={forCapture ? {
+          background: "linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)",
+          color: "white",
+          padding: "32px",
+          borderRadius: "8px",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+          border: "4px solid #dc2626",
+          width: "700px",
+          fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif"
+        } : { width: "700px", minHeight: "fit-content" }}
+      >
+        <div 
+          className={forCapture ? "" : "text-center mb-8 border-b-2 border-red-600 pb-6"}
+          style={forCapture ? {
+            textAlign: "center",
+            marginBottom: "32px",
+            borderBottom: "2px solid #dc2626",
+            paddingBottom: "24px"
+          } : {}}
+        >
+          <div 
+            className={forCapture ? "" : "flex items-center justify-center gap-3 mb-3"}
+            style={forCapture ? { display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", marginBottom: "12px" } : {}}
+          >
+            <h2 
+              className={forCapture ? "" : "text-2xl font-bold text-white"}
+              style={forCapture ? { fontSize: "24px", fontWeight: "bold", margin: "12px 0", color: "white" } : {}}
+            >
+              The National Freedom League
+            </h2>
+            <span className="text-3xl">🇺🇸</span>
+          </div>
+          <p 
+            className={forCapture ? "" : "text-blue-200 text-lg mb-2"}
+            style={forCapture ? { color: "#bfdbfe", fontSize: "18px", margin: "8px 0" } : {}}
+          >
+            Championship Season 2025 - Week {selectedWeek}
+          </p>
+          <p 
+            className={forCapture ? "" : "text-yellow-300 font-bold mb-1"}
+            style={forCapture ? { color: "#fde047", fontWeight: "bold", margin: "4px 0" } : {}}
+          >
+            Freedom Points Standings
+          </p>
+          <p 
+            className={forCapture ? "" : "text-blue-300 text-sm"}
+            style={forCapture ? { color: "#93c5fd", fontSize: "14px", margin: "4px 0" } : {}}
+          >
+            Est. 2015
+          </p>
+        </div>
+
+        <div 
+          className={forCapture ? "" : "flex items-center justify-between p-4 mb-4 bg-white/10 rounded-lg border border-white/20"}
+          style={forCapture ? {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "16px",
+            marginBottom: "16px",
+            background: "rgba(255, 255, 255, 0.1)",
+            borderRadius: "8px",
+            border: "1px solid rgba(255, 255, 255, 0.2)"
+          } : {}}
+        >
+          <div 
+            className={forCapture ? "" : "flex items-center gap-4"}
+            style={forCapture ? { display: "flex", alignItems: "center", gap: "16px" } : {}}
+          >
+            <span 
+              className={forCapture ? "" : "text-yellow-300 font-bold text-lg w-12"}
+              style={forCapture ? { color: "#fde047", fontWeight: "bold", fontSize: "18px", width: "48px" } : {}}
+            >
+              Rank
+            </span>
+            <span 
+              className={forCapture ? "" : "text-yellow-300 font-bold text-lg"}
+              style={forCapture ? { color: "#fde047", fontWeight: "bold", fontSize: "18px" } : {}}
+            >
+              Team Name
+            </span>
+          </div>
+          <div 
+            className={forCapture ? "" : "flex gap-8 text-yellow-300 font-bold text-lg"}
+            style={forCapture ? { display: "flex", gap: "32px", color: "#fde047", fontWeight: "bold", fontSize: "18px" } : {}}
+          >
+            <span 
+              className={forCapture ? "" : "w-20 text-center"}
+              style={forCapture ? { width: "80px", textAlign: "center" } : {}}
+            >
+              Total FPs
+            </span>
+            <span 
+              className={forCapture ? "" : "w-20 text-center"}
+              style={forCapture ? { width: "80px", textAlign: "center" } : {}}
+            >
+              Week FPs
+            </span>
+          </div>
+        </div>
+
+        <div 
+          className={forCapture ? "" : "space-y-3"}
+          style={forCapture ? { display: "flex", flexDirection: "column", gap: "12px" } : {}}
+        >
+          {sortedByTotal.map((team, index) => (
+            <div
+              key={team.id}
+              className={forCapture ? "" : "flex items-center justify-between p-4 rounded-lg text-white font-medium border border-white/20"}
+              style={forCapture ? {
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "16px",
+                borderRadius: "8px",
+                color: "white",
+                fontWeight: "500",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                backgroundColor: getPatrioticGradientColor(team.totalFPs, teamsData)
+              } : { backgroundColor: getPatrioticGradientColor(team.totalFPs, teamsData) }}
+            >
+              <div 
+                className={forCapture ? "" : "flex items-center gap-4"}
+                style={forCapture ? { display: "flex", alignItems: "center", gap: "16px" } : {}}
+              >
+                <span 
+                  className={forCapture ? "" : "text-white font-bold text-lg w-12"}
+                  style={forCapture ? { color: "white", fontWeight: "bold", fontSize: "18px", width: "48px" } : {}}
+                >
+                  {index + 1}.
+                </span>
+                <span 
+                  className={forCapture ? "" : "text-white font-bold text-lg"}
+                  style={forCapture ? { color: "white", fontWeight: "bold", fontSize: "18px" } : {}}
+                >
+                  {team.name}
+                </span>
+              </div>
+              <div 
+                className={forCapture ? "" : "flex gap-8 text-white font-bold text-lg"}
+                style={forCapture ? { display: "flex", gap: "32px", color: "white", fontWeight: "bold", fontSize: "18px" } : {}}
+              >
+                <span 
+                  className={forCapture ? "" : "w-20 text-center"}
+                  style={forCapture ? { width: "80px", textAlign: "center" } : {}}
+                >
+                  {team.totalFPs}
+                </span>
+                <span 
+                  className={forCapture ? "" : "w-20 text-center"}
+                  style={forCapture ? { width: "80px", textAlign: "center" } : {}}
+                >
+                  {team.weekFPs}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div 
+          className={forCapture ? "" : "text-center mt-8 pt-6 border-t-2 border-red-600"}
+          style={forCapture ? {
+            textAlign: "center",
+            marginTop: "32px",
+            paddingTop: "24px",
+            borderTop: "2px solid #dc2626"
+          } : {}}
+        >
+          <p 
+            className={forCapture ? "" : "text-blue-200 text-sm"}
+            style={forCapture ? { color: "#bfdbfe", fontSize: "14px", margin: "0" } : {}}
+          >
+            🇺🇸 Share the Freedom! 🇺🇸
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   const copyTextVersion = async () => {
     try {
       setIsLoading(true)
@@ -241,7 +427,7 @@ export default function FantasyFootballDashboard() {
         text += `${star}${(index + 1).toString().padStart(2)}. ${team.name.padEnd(15)} | ${team.totalFPs.toString().padStart(3)} | ${team.weekFPs.toString().padStart(2)}\n`
       })
 
-      text += `\n🇺🇸 Est. 2023 | Share the Freedom! 🇺🇸`
+      text += `\n🇺🇸 Est. 2015 | Share the Freedom! 🇺🇸`
 
       await navigator.clipboard.writeText(text)
       setCopySuccess("Freedom shared successfully!")
@@ -255,151 +441,42 @@ export default function FantasyFootballDashboard() {
   }
 
   const copyImageVersion = async () => {
-    if (!sharePreviewRef.current) return
-
     try {
       setIsLoading(true)
       
-      // Check clipboard permissions first
-      if (!navigator.clipboard || !navigator.clipboard.write) {
-        throw new Error("Clipboard API not supported")
-      }
-
+      // Mobile fallback - create and download image instead of copying to clipboard
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      const supportsClipboard = !!(navigator.clipboard?.write) && typeof ClipboardItem !== 'undefined'
+      
       const html2canvas = (await import("html2canvas")).default
       
-      // Create a completely new element with inline styles instead of cloning
-      const createStyledElement = () => {
-        const container = document.createElement('div')
-        container.style.cssText = `
-          background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
-          color: white;
-          padding: 32px;
-          border-radius: 8px;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-          border: 4px solid #dc2626;
-          width: 700px;
-          min-height: fit-content;
-          font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
-          position: absolute;
-          left: -9999px;
-          top: -9999px;
-        `
+      // Create a temporary container for the shareable component
+      const tempContainer = document.createElement('div')
+      tempContainer.style.position = 'absolute'
+      tempContainer.style.left = '-9999px'
+      tempContainer.style.top = '-9999px'
+      document.body.appendChild(tempContainer)
 
-        // Header
-        const header = document.createElement('div')
-        header.style.cssText = `
-          text-align: center;
-          margin-bottom: 32px;
-          border-bottom: 2px solid #dc2626;
-          padding-bottom: 24px;
-        `
-        
-        const title = document.createElement('h2')
-        title.style.cssText = 'font-size: 24px; font-weight: bold; margin: 12px 0; color: white;'
-        title.textContent = '🇺🇸 The National Freedom League'
-        
-        const subtitle = document.createElement('p')
-        subtitle.style.cssText = 'color: #bfdbfe; font-size: 18px; margin: 8px 0;'
-        subtitle.textContent = `Championship Season 2025 - Week ${selectedWeek}`
-        
-        const standings = document.createElement('p')
-        standings.style.cssText = 'color: #fde047; font-weight: bold; margin: 4px 0;'
-        standings.textContent = 'Freedom Points Standings'
-        
-        const est = document.createElement('p')
-        est.style.cssText = 'color: #93c5fd; font-size: 14px; margin: 4px 0;'
-        est.textContent = 'Est. 2023'
-        
-        header.appendChild(title)
-        header.appendChild(subtitle)
-        header.appendChild(standings)
-        header.appendChild(est)
+      // Use React to render the shareable component into the temp container
+      const { createRoot } = await import('react-dom/client')
+      const root = createRoot(tempContainer)
+      
+      await new Promise<void>((resolve) => {
+        root.render(<ShareableStandings forCapture={true} />)
+        setTimeout(resolve, 200) // Wait for React to render
+      })
 
-        // Table header
-        const tableHeader = document.createElement('div')
-        tableHeader.style.cssText = `
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 16px;
-          margin-bottom: 16px;
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 8px;
-          border: 1px solid rgba(255, 255, 255, 0.2);
-        `
-        
-        const headerLeft = document.createElement('div')
-        headerLeft.style.cssText = 'display: flex; align-items: center; gap: 16px;'
-        headerLeft.innerHTML = '<span style="color: #fde047; font-weight: bold; font-size: 18px; width: 48px;">Rank</span><span style="color: #fde047; font-weight: bold; font-size: 18px;">Team Name</span>'
-        
-        const headerRight = document.createElement('div')
-        headerRight.style.cssText = 'display: flex; gap: 32px; color: #fde047; font-weight: bold; font-size: 18px;'
-        headerRight.innerHTML = '<span style="width: 80px; text-align: center;">Total FPs</span><span style="width: 80px; text-align: center;">Week FPs</span>'
-        
-        tableHeader.appendChild(headerLeft)
-        tableHeader.appendChild(headerRight)
-
-        // Team rows
-        const teamsContainer = document.createElement('div')
-        teamsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 12px;'
-        
-        const sortedByTotal = [...teamsData].sort((a, b) => b.totalFPs - a.totalFPs)
-        
-        sortedByTotal.forEach((team, index) => {
-          const row = document.createElement('div')
-          const bgColor = getPatrioticGradientColor(team.totalFPs, teamsData)
-          row.style.cssText = `
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background-color: ${bgColor};
-          `
-          
-          const rowLeft = document.createElement('div')
-          rowLeft.style.cssText = 'display: flex; align-items: center; gap: 16px;'
-          rowLeft.innerHTML = `<span style="color: white; font-weight: bold; font-size: 18px; width: 48px;">${index + 1}.</span><span style="color: white; font-weight: bold; font-size: 18px;">${team.name}</span>`
-          
-          const rowRight = document.createElement('div')
-          rowRight.style.cssText = 'display: flex; gap: 32px; color: white; font-weight: bold; font-size: 18px;'
-          rowRight.innerHTML = `<span style="width: 80px; text-align: center;">${team.totalFPs}</span><span style="width: 80px; text-align: center;">${team.weekFPs}</span>`
-          
-          row.appendChild(rowLeft)
-          row.appendChild(rowRight)
-          teamsContainer.appendChild(row)
-        })
-
-        // Footer
-        const footer = document.createElement('div')
-        footer.style.cssText = `
-          text-align: center;
-          margin-top: 32px;
-          padding-top: 24px;
-          border-top: 2px solid #dc2626;
-        `
-        footer.innerHTML = '<p style="color: #bfdbfe; font-size: 14px; margin: 0;">🇺🇸 Share the Freedom! 🇺🇸</p>'
-
-        container.appendChild(header)
-        container.appendChild(tableHeader)
-        container.appendChild(teamsContainer)
-        container.appendChild(footer)
-        
-        return container
+      // Get the actual rendered element
+      const renderedElement = tempContainer.firstElementChild as HTMLElement
+      if (!renderedElement) {
+        throw new Error("Failed to render shareable component")
       }
 
-      const tempElement = createStyledElement()
-      document.body.appendChild(tempElement)
+      // Get actual dimensions
+      const elementRect = renderedElement.getBoundingClientRect()
+      const actualHeight = Math.max(elementRect.height, renderedElement.scrollHeight)
 
-      // Wait for element to be rendered and get its actual dimensions
-      await new Promise(resolve => setTimeout(resolve, 100))
-      const elementRect = tempElement.getBoundingClientRect()
-      const actualHeight = Math.max(elementRect.height, tempElement.scrollHeight)
-
-      const canvas = await html2canvas(tempElement, {
+      const canvas = await html2canvas(renderedElement, {
         backgroundColor: "#1e3a8a",
         scale: 2,
         width: 700,
@@ -408,28 +485,50 @@ export default function FantasyFootballDashboard() {
         allowTaint: true,
       })
 
-      // Clean up temp element
-      document.body.removeChild(tempElement)
+      // Clean up
+      root.unmount()
+      document.body.removeChild(tempContainer)
 
-      // Convert canvas to blob and copy to clipboard
-      await new Promise<void>((resolve, reject) => {
-        canvas.toBlob(async (blob) => {
-          if (blob) {
-            try {
-              const item = new ClipboardItem({ "image/png": blob })
-              await navigator.clipboard.write([item])
-              setCopySuccess("Freedom shared successfully!")
-              setTimeout(() => setCopySuccess(null), 3000)
-              resolve()
-            } catch (clipboardError) {
-              console.error("Clipboard error:", clipboardError)
-              reject(clipboardError)
+      // Handle based on device/browser capabilities
+      if (!isMobile && supportsClipboard) {
+        // Desktop: Copy to clipboard
+        await new Promise<void>((resolve, reject) => {
+          canvas.toBlob(async (blob) => {
+            if (blob) {
+              try {
+                const item = new ClipboardItem({ "image/png": blob })
+                await navigator.clipboard.write([item])
+                setCopySuccess("Freedom shared successfully!")
+                setTimeout(() => setCopySuccess(null), 3000)
+                resolve()
+              } catch (clipboardError) {
+                console.error("Clipboard error:", clipboardError)
+                reject(clipboardError)
+              }
+            } else {
+              reject(new Error("Failed to create image blob"))
             }
+          }, "image/png")
+        })
+      } else {
+        // Mobile/fallback: Download image
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const url = URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = url
+            link.download = `freedom-league-week-${selectedWeek}.png`
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            URL.revokeObjectURL(url)
+            setCopySuccess("Freedom image downloaded!")
+            setTimeout(() => setCopySuccess(null), 3000)
           } else {
-            reject(new Error("Failed to create image blob"))
+            throw new Error("Failed to create image blob")
           }
         }, "image/png")
-      })
+      }
     } catch (error) {
       console.error("Copy image error:", error)
       setError(`Failed to share the freedom: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -525,7 +624,7 @@ export default function FantasyFootballDashboard() {
                     🇺🇸 The National Freedom League
                   </h1>
                   <p className="text-blue-700 font-semibold">Freedom Points Standings</p>
-                  <p className="text-xs text-blue-600">Est. 2023</p>
+                  <p className="text-xs text-blue-600">Est. 2015</p>
                 </div>
               </div>
             </div>
@@ -914,56 +1013,8 @@ export default function FantasyFootballDashboard() {
                 </DialogHeader>
 
                 <div className="flex flex-col items-center gap-6">
-                  <div
-                    ref={sharePreviewRef}
-                    className="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-8 rounded-lg shadow-2xl border-4 border-red-600"
-                    style={{ width: "700px", minHeight: "fit-content" }}
-                  >
-                    <div className="text-center mb-8 border-b-2 border-red-600 pb-6">
-                      <div className="flex items-center justify-center gap-3 mb-3">
-                        <h2 className="text-2xl font-bold text-white">The National Freedom League</h2>
-                        <span className="text-3xl">🇺🇸</span>
-                      </div>
-                      <p className="text-blue-200 text-lg mb-2">Championship Season 2025 - Week {selectedWeek}</p>
-                      <p className="text-yellow-300 font-bold mb-1">Freedom Points Standings</p>
-                      <p className="text-blue-300 text-sm">Est. 2023</p>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 mb-4 bg-white/10 rounded-lg border border-white/20">
-                      <div className="flex items-center gap-4">
-                        <span className="text-yellow-300 font-bold text-lg w-12">Rank</span>
-                        <span className="text-yellow-300 font-bold text-lg">Team Name</span>
-                      </div>
-                      <div className="flex gap-8 text-yellow-300 font-bold text-lg">
-                        <span className="w-20 text-center">Total FPs</span>
-                        <span className="w-20 text-center">Week FPs</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      {[...teamsData]
-                        .sort((a, b) => b.totalFPs - a.totalFPs)
-                        .map((team, index) => (
-                          <div
-                            key={team.id}
-                            className="flex items-center justify-between p-4 rounded-lg text-white font-medium border border-white/20"
-                            style={{ backgroundColor: getPatrioticGradientColor(team.totalFPs, teamsData) }}
-                          >
-                            <div className="flex items-center gap-4">
-                              <span className="text-white font-bold text-lg w-12">{index + 1}.</span>
-                              <span className="text-white font-bold text-lg">{team.name}</span>
-                            </div>
-                            <div className="flex gap-8 text-white font-bold text-lg">
-                              <span className="w-20 text-center">{team.totalFPs}</span>
-                              <span className="w-20 text-center">{team.weekFPs}</span>
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-
-                    <div className="text-center mt-8 pt-6 border-t-2 border-red-600">
-                      <p className="text-blue-200 text-sm">🇺🇸 Share the Freedom! 🇺🇸</p>
-                    </div>
+                  <div ref={sharePreviewRef}>
+                    <ShareableStandings />
                   </div>
 
                   <div className="flex gap-3 justify-center">
