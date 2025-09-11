@@ -63,3 +63,6 @@ The main page component (`app/page.tsx`) is a comprehensive fantasy football das
 - `@/components` - UI components
 - `@/lib` - Utility libraries
 - `@/hooks` - Custom hooks (though none currently exist)
+
+### RULES
+- Always kill processes when you are done working

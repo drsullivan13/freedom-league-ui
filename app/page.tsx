@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -22,8 +22,13 @@ import {
   RefreshCw,
   CheckCircle,
 } from "lucide-react"
+import { fetchLeagueInfo, fetchFreedomStandings, FreedomLeagueAPIError } from "@/lib/api/freedomLeague"
+import { transformAPIResponseToTeamData, getLastWeekWithData } from "@/lib/utils/dataTransformers"
+import { TeamData } from "@/lib/types/ui"
+import { FreedomStandings } from "@/lib/types/api"
 
-const teamsData = [
+// Static fallback data - will be replaced by API data
+const fallbackTeamsData: TeamData[] = [
   {
     id: 1,
     name: "Homan's Heroes",
@@ -127,6 +132,13 @@ const teamsData = [
 ]
 
 export default function FantasyFootballDashboard() {
+  // API-related state
+  const [availableSeasons, setAvailableSeasons] = useState<Record<string, number>>({})
+  const [teamsData, setTeamsData] = useState<TeamData[]>(fallbackTeamsData)
+  const [freedomStandingsCache, setFreedomStandingsCache] = useState<Record<string, FreedomStandings>>({})
+  const [isInitializing, setIsInitializing] = useState(true)
+  
+  // Existing UI state
   const [selectedSeason, setSelectedSeason] = useState("2025")
   const [selectedWeek, setSelectedWeek] = useState("1")
   const [viewMode, setViewMode] = useState<"total" | "weekly">("total")
@@ -135,11 +147,132 @@ export default function FantasyFootballDashboard() {
   const [shareModalOpen, setShareModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [isOnline, setIsOnline] = useState(true)
+  const [isOnline] = useState(true)
   const [copySuccess, setCopySuccess] = useState<string | null>(null)
   const sharePreviewRef = useRef<HTMLDivElement>(null)
 
-  const effectiveSortBy = viewMode === "weekly" ? "weekFPs" : "totalFPs"
+  // Initialize the app with league info and data
+  useEffect(() => {
+    const initializeApp = async () => {
+      try {
+        setIsInitializing(true)
+        setError(null)
+        
+        // Fetch league info to get available seasons
+        const leagueInfo = await fetchLeagueInfo()
+        setAvailableSeasons(leagueInfo.availableSeasons)
+        
+        // Set initial season to the most recent one with data
+        const seasons = Object.keys(leagueInfo.availableSeasons).sort((a, b) => b.localeCompare(a))
+        if (seasons.length > 0) {
+          const mostRecentSeason = seasons[0]
+          setSelectedSeason(mostRecentSeason)
+          
+          // Fetch freedom standings for the initial season to determine actual max week
+          const standings = await fetchFreedomStandings(mostRecentSeason)
+          
+          // Cache the response
+          setFreedomStandingsCache(prev => ({
+            ...prev,
+            [mostRecentSeason]: standings
+          }))
+          
+          // Get the actual last week with data
+          const actualMaxWeek = getLastWeekWithData(standings.weeklyFreedomPoints)
+          
+          // Update available seasons with the actual max week
+          setAvailableSeasons(prev => ({
+            ...prev,
+            [mostRecentSeason]: actualMaxWeek
+          }))
+          
+          // Set initial week to the actual max week
+          setSelectedWeek(String(actualMaxWeek))
+          
+          // Transform and set data for the initial week
+          const transformedData = transformAPIResponseToTeamData(standings, actualMaxWeek)
+          setTeamsData(transformedData)
+        }
+      } catch (error) {
+        console.error('Failed to initialize app:', error)
+        if (error instanceof FreedomLeagueAPIError) {
+          setError(`API Error: ${error.message}`)
+        } else {
+          setError('Failed to load league data. Using fallback data.')
+        }
+      } finally {
+        setIsInitializing(false)
+      }
+    }
+    
+    initializeApp()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  
+  // Update teams data from cached standings
+  const updateTeamsDataFromCache = (season: string, week: number) => {
+    const cachedData = freedomStandingsCache[season]
+    if (cachedData) {
+      const transformedData = transformAPIResponseToTeamData(cachedData, week)
+      setTeamsData(transformedData)
+    }
+  }
+
+  // Handle season change
+  const handleSeasonChange = async (newSeason: string) => {
+    setSelectedSeason(newSeason)
+    
+    try {
+      // Check if we already have cached data for this season
+      if (freedomStandingsCache[newSeason]) {
+        // We have cached data, get the actual max week
+        const actualMaxWeek = getLastWeekWithData(freedomStandingsCache[newSeason].weeklyFreedomPoints)
+        setSelectedWeek(String(actualMaxWeek))
+        updateTeamsDataFromCache(newSeason, actualMaxWeek)
+      } else {
+        // Load standings for the new season
+        setIsLoading(true)
+        const standings = await fetchFreedomStandings(newSeason)
+        
+        // Cache the response
+        setFreedomStandingsCache(prev => ({
+          ...prev,
+          [newSeason]: standings
+        }))
+        
+        // Get the actual last week with data and update available seasons
+        const actualMaxWeek = getLastWeekWithData(standings.weeklyFreedomPoints)
+        setAvailableSeasons(prev => ({
+          ...prev,
+          [newSeason]: actualMaxWeek
+        }))
+        
+        // Set the week to the actual max week
+        setSelectedWeek(String(actualMaxWeek))
+        
+        // Update teams data for the actual max week
+        const transformedData = transformAPIResponseToTeamData(standings, actualMaxWeek)
+        setTeamsData(transformedData)
+      }
+    } catch (error) {
+      console.error('Failed to change season:', error)
+      if (error instanceof FreedomLeagueAPIError) {
+        setError(`Failed to load ${newSeason} data: ${error.message}`)
+      } else {
+        setError(`Network error loading ${newSeason} data`)
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+  
+  // Handle week change (using cached data, no API call)
+  const handleWeekChange = (newWeek: string) => {
+    setSelectedWeek(newWeek)
+    updateTeamsDataFromCache(selectedSeason, parseInt(newWeek))
+  }
+
+  // const effectiveSortBy = viewMode === "weekly" ? "weekFPs" : "totalFPs"
 
   const sortedTeams = [...teamsData].sort((a, b) => {
     const aValue = sortBy === "totalFPs" ? a.totalFPs : a.weekFPs
@@ -159,14 +292,15 @@ export default function FantasyFootballDashboard() {
   const handlePreviousWeek = () => {
     const currentWeek = Number.parseInt(selectedWeek)
     if (currentWeek > 1) {
-      setSelectedWeek(String(currentWeek - 1))
+      handleWeekChange(String(currentWeek - 1))
     }
   }
 
   const handleNextWeek = () => {
     const currentWeek = Number.parseInt(selectedWeek)
-    if (currentWeek < 14) {
-      setSelectedWeek(String(currentWeek + 1))
+    const maxWeek = availableSeasons[selectedSeason] || 14
+    if (currentWeek < maxWeek) {
+      handleWeekChange(String(currentWeek + 1))
     }
   }
 
@@ -432,7 +566,7 @@ export default function FantasyFootballDashboard() {
       await navigator.clipboard.writeText(text)
       setCopySuccess("Freedom shared successfully!")
       setTimeout(() => setCopySuccess(null), 3000)
-    } catch (error) {
+    } catch {
       setError("Failed to share the freedom. Please try again.")
       setTimeout(() => setError(null), 3000)
     } finally {
@@ -540,8 +674,58 @@ export default function FantasyFootballDashboard() {
 
   const retryOperation = () => {
     setError(null)
-    setIsLoading(true)
-    setTimeout(() => setIsLoading(false), 1000)
+    // Retry by re-initializing the app
+    const initializeApp = async () => {
+      try {
+        setIsInitializing(true)
+        setError(null)
+        
+        const leagueInfo = await fetchLeagueInfo()
+        setAvailableSeasons(leagueInfo.availableSeasons)
+        
+        const seasons = Object.keys(leagueInfo.availableSeasons).sort((a, b) => b.localeCompare(a))
+        if (seasons.length > 0) {
+          const mostRecentSeason = seasons[0]
+          setSelectedSeason(mostRecentSeason)
+          
+          // Fetch freedom standings for the initial season to determine actual max week
+          const standings = await fetchFreedomStandings(mostRecentSeason)
+          
+          // Cache the response
+          setFreedomStandingsCache(prev => ({
+            ...prev,
+            [mostRecentSeason]: standings
+          }))
+          
+          // Get the actual last week with data
+          const actualMaxWeek = getLastWeekWithData(standings.weeklyFreedomPoints)
+          
+          // Update available seasons with the actual max week
+          setAvailableSeasons(prev => ({
+            ...prev,
+            [mostRecentSeason]: actualMaxWeek
+          }))
+          
+          // Set initial week to the actual max week
+          setSelectedWeek(String(actualMaxWeek))
+          
+          // Transform and set data for the initial week
+          const transformedData = transformAPIResponseToTeamData(standings, actualMaxWeek)
+          setTeamsData(transformedData)
+        }
+      } catch (retryError) {
+        console.error('Retry failed:', retryError)
+        if (retryError instanceof FreedomLeagueAPIError) {
+          setError(`Retry failed: ${retryError.message}`)
+        } else {
+          setError('Retry failed. Please check your connection.')
+        }
+      } finally {
+        setIsInitializing(false)
+      }
+    }
+    
+    initializeApp()
   }
 
   const LoadingSkeleton = () => (
@@ -630,17 +814,22 @@ export default function FantasyFootballDashboard() {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Select value={selectedSeason} onValueChange={setSelectedSeason}>
+              <Select value={selectedSeason} onValueChange={handleSeasonChange}>
                 <SelectTrigger
                   className="w-full sm:w-32 min-h-[48px] focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 border-blue-200"
                   aria-label="Select season"
+                  disabled={isInitializing}
                 >
                   <SelectValue placeholder="Season" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="2025">2025</SelectItem>
-                  <SelectItem value="2024">2024</SelectItem>
-                  <SelectItem value="2023">2023</SelectItem>
+                  {Object.keys(availableSeasons).length > 0 ? 
+                    Object.keys(availableSeasons).sort((a, b) => b.localeCompare(a)).map(season => (
+                      <SelectItem key={season} value={season}>{season}</SelectItem>
+                    )) : (
+                      <SelectItem value="2025">2025</SelectItem>
+                    )
+                  }
                 </SelectContent>
               </Select>
 
@@ -649,22 +838,23 @@ export default function FantasyFootballDashboard() {
                   variant="outline"
                   size="sm"
                   onClick={handlePreviousWeek}
-                  disabled={selectedWeek === "1"}
+                  disabled={selectedWeek === "1" || isInitializing}
                   className="min-h-[48px] min-w-[48px] transition-all duration-200 hover:scale-105 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 border-blue-200 hover:bg-blue-50 bg-transparent"
                   aria-label="Previous week"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
 
-                <Select value={selectedWeek} onValueChange={setSelectedWeek}>
+                <Select value={selectedWeek} onValueChange={handleWeekChange}>
                   <SelectTrigger
                     className="w-full sm:w-32 min-h-[48px] focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 border-blue-200"
                     aria-label="Select week"
+                    disabled={isInitializing}
                   >
                     <SelectValue placeholder="Week" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from({ length: 14 }, (_, i) => (
+                    {Array.from({ length: availableSeasons[selectedSeason] || 14 }, (_, i) => (
                       <SelectItem key={i + 1} value={String(i + 1)}>
                         Week {i + 1}
                       </SelectItem>
@@ -676,7 +866,7 @@ export default function FantasyFootballDashboard() {
                   variant="outline"
                   size="sm"
                   onClick={handleNextWeek}
-                  disabled={selectedWeek === "14"}
+                  disabled={selectedWeek === String(availableSeasons[selectedSeason] || 14) || isInitializing}
                   className="min-h-[48px] min-w-[48px] transition-all duration-200 hover:scale-105 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 border-blue-200 hover:bg-blue-50 bg-transparent"
                   aria-label="Next week"
                 >
@@ -769,7 +959,7 @@ export default function FantasyFootballDashboard() {
             </Card>
           </div>
 
-          {isLoading ? (
+          {(isLoading || isInitializing) ? (
             <LoadingSkeleton />
           ) : error && !teamsData.length ? (
             <EmptyState />
