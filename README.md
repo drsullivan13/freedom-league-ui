@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# National Freedom League UI
 
-## Getting Started
+A mobile-first fantasy football dashboard for weekly Freedom Points rankings,
+real matchup records, team scores, rank movement, and shareable Tuesday recaps.
 
-First, run the development server:
+## Stack
+
+- Next.js 16 App Router and React 19
+- Tailwind CSS 4
+- Server-side adapter for `fantasy-sports-hub`
+- `ImageResponse` recap images with native Web Share support
+
+## Configuration
+
+Create `.env.local`:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+FANTASY_SPORTS_API_URL=http://localhost:5001
+LEAGUE_TYPE=football
+LEAGUE_ID=248873
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Only the Next.js server calls the fantasy API. Do not expose ESPN cookies through
+`NEXT_PUBLIC_*` variables.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Development
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run dev
+```
 
-## Learn More
+The app runs at <http://localhost:3000>. Start `fantasy-sports-hub` separately
+on port 5001.
 
-To learn more about Next.js, take a look at the following resources:
+## Validation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run lint
+npm run typecheck
+npm run build
+# or all three
+npm run check
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Sharing
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The recap image is generated at `/api/recap?season=YYYY&week=N`. On supported
+phones, **Share recap** opens the native share sheet so the image can be sent
+through Messages. Save-image and copy-text actions remain available as
+fallbacks.
