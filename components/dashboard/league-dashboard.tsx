@@ -45,7 +45,9 @@ const secureLogoUrl = (logoUrl: string | null) => {
 
   try {
     const url = new URL(logoUrl)
-    return url.protocol === "https:" ? url.toString() : null
+    return url.protocol === "https:" && url.hostname === "g.espncdn.com"
+      ? url.toString()
+      : null
   } catch {
     return null
   }
